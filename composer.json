@@ -1,0 +1,20 @@
+{
+    "name": "maer/validator",
+    "description": "An easy and customizable validation library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Magnus Eriksson",
+            "email": "mange@reloop.se"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Maer\\Validator\\": "src/"
+        }
+    },
+    "minimum-stability": "stable",
+    "require": {
+        "php": ">=5.4.0"
+    }
+}
