@@ -1,10 +1,7 @@
 # Validator
 
-An easy and customizable validation library.
 
-> This library is still under development. It's not recommended to use it in production before there are at least one tagged version. There might be breaking changes.
-
-#####So, why create yet another validation library?
+#### So, why create yet another validation library?
 After searching for a simple standalone validation library, I've yet to find one that is actively maintained, doesn't require you to run through hoops to make it play nicely with your application or has a bunch of third party dependencies. And it's always fun to build stuff!
 
 This library is ment to be very customizable and easy to fit into most application without too much work.
@@ -16,76 +13,122 @@ You should probably use [composer](https://getcomposer.org):
 
     composer require maer/validator dev-master
 
+_Change `dev-master` to the latest tagged release_
+
 Load composers autoloader:
 
-    include 'path/to/vendor/autoload.php';
+```php
+include 'path/to/vendor/autoload.php';
+```
 
 ## Simple example
 
-    // Main instance, this only needs to be instantiated once
-    $validator = new Maer\Validator\Validator;
-    
-    // Data to validate
-    $data = [
-        'name'        => 'Chuck Norris',
-        'status'      => 'awesome',
-        'email'       => 'master@universe.com',
-        'won_fights'  => 10000,
-        'lost_fights' => -1
-    ];
+```php
+// Main instance, this only needs to be instantiated once
+$validator = new Maer\Validator\Validator;
 
-    $rules = [
-        'name'        => 'required|minLength:2|maxLength:32',
-        'status'      => 'required|in:cool,awesome,something else',
-        'email'       => 'required|email',
-        'won_fights'  => 'required|integer',
-        'lost_fights' => 'required|integer',
-    ];
+$data = [
+    'name'        => 'Chuck Norris',
+    'status'      => 'awesome',
+    'email'       => 'master@universe.com',
+    'won_fights'  => 10000,
+    'lost_fights' => -1
+];
+
+$rules = [
+    'name'        => ['required','minLength:2','maxLength:32'],
+    'status'      => ['required','in:cool,awesome,something else'],
+    'email'       => ['required','email'],
+    'won_fights'  => ['required','integer'],
+    'lost_fights' => ['required','integer'],
+];
 
 
-    // Create a new validation instance
-    $v = $validator->make($data, $rules);
+// Create a new validation instance
+$v = $validator->make($data, $rules);
 
-    // Validate
-    if ($v->passes()) {
-        echo "Yay.. it passed!";
-    } else {
-        echo "Nope. We got validation errors";
-    }
+// Validate
+if ($v->passes()) {
+    echo "Yay.. it passed!";
+} else {
+    var_dump($v->errors()->all());
+}
+```
 
 ## Get errors
 
-if the validaton doesn't pass, you can get the error messages/invalid fields with the `Validation::getErrors()`-method:
+if the validaton doesn't pass, you can get the error messages/invalid fields with the `Validation::errors()`-method:
 
-    if (!$v->passes()) {
-        $errors = $v->getErrors();
-    }
+```php
+if ($v->passes() == false) {
+    $errors = $v->errors();
+}
+```
 
-The `getErrors()`-method returns an array with the field name as key and the error as value:    
-    
-    [
-        'field_name'  => 'error_message',
-        'field_name2' => 'error_message2',
-    ]
+The `errors()`-method returns an instance of the `Errors´-class. To fetch a list of failed fields and their error messages:
+
+```php
+$messages = $v->errors()->all();
+
+// returns:
+// [
+//    'field_name'  => 'error_message',
+//    'field_name2' => 'error_message2',
+// ]
+```
+
+If you just want a list of the failed fields:
+```php
+$fields = $v->errors()->fields();
+
+// returns:
+// [
+//    'field_name1',
+//    'field_name2',
+// ]
+```
+
+To check if a specific field failed:
+```php
+if ($v->errors()->has('field_name')) {
+    echo "field_name failed...";
+}
+```
+
 
 
 ## Custom error messages
 You can override the built in error messages by sending in an array with your custom messages as a third parameter when you make a new validation instance:
 
-    $v = $validator->make($data, $rules, [
-        'required' => "Yo! The field %s is required, dude!",
-        'email'    => "No no no, %s must be a valid email",
-        ...
-    ]);
+```php
+$v = $validator->make($data, $rules, [
+    'required' => "Yo! The field %s is required, dude!",
+    'email'    => "No no no, %s must be a valid email",
+    ...
+]);
+```
 
 You only need to add the messages you want to override.
 
+## Use nice field names
+If you're planning to show the error messages to the user, it might not be a good idea to use the field name in the messages (example: "The field company_name must be at least xx characters").
+
+To use a nice field name instead, use the `as`-parameter in your rule declaration:
+
+```php
+[
+    'comapny_name' => ['required', 'minLength:2', 'as' => 'Company Name'],
+    ...
+]
+```
+
+If the `company_name` fails, you will get a nicer message: "The field Company Name must be at least xx characters".
 
 ## Available rules
 
 |Rule                           |  Description                                              |
 |-------------------------------|-----------------------------------------------------------|
-| **required**                  | Checks if the value isn't empty                           |
+| **required**                  | Checks if the input exists and isn't null                 |
 | **minLength:**_arg_           | Input must be more or equal in length                     |
 | **maxLenght:**_arg_           | Input must be less or equal in length                     |
 | **minSize:**_arg_             | Input must have a value of more or equal                  |
@@ -116,14 +159,16 @@ It wouldn't be very customizable if you couldn't add your own validation rules.
 To register your own rules, you need to create a new class which extends the `Maer\Validator\Ruleset`-class,
 If we want to create a new rule called **myCoolRule** that takes one argument **myCoolRule:**_value_, it would look something like this:
 
-    class MyRules extends Maer\Validator\Ruleset
+```php
+class MyRules extends Maer\Validator\Rules\Ruleset
+{
+    public function ruleMyCoolRule($input, $arg)
     {
-        public function ruleMyCoolRule($input, $arg)
-        {
-            // Do some awesome validation
-            return true/false;
-        } 
-    }
+        // Do some awesome validation
+        return true/false;
+    } 
+}
+```
 
 The `$input` is the value to validate. The `$arg` is the rule argument (omit this if your rule doesn't have any arguments). For multiple arguments, use: **rule:**_arg1,arg2..._
 
@@ -138,11 +183,12 @@ To make the rule fail, it must return `false` (strict checking). All other respo
 
 This is quite simple. Just add it to your ruleset to your validation instance:
 
-    $v = $validator->make($data, $rules);
+```php
+$v = $validator->make($data, $rules);
 
-    $v->addRuleset(new MyRules);
+$v->addRuleset(new MyRules);
+```
 
 Now you're ready to validate your data with your new rule: `myCoolRule:something`.
 
 You can add multiple rulesets to your validation instance. In case several rules in different ruleset shares the same name, the rule from the first registered ruleset will be used. This also means that none of the default rules can be overridden.
-

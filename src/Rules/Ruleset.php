@@ -1,4 +1,4 @@
-<?php namespace Maer\Validator;
+<?php namespace Maer\Validator\Rules;
 
 abstract class Ruleset
 {
