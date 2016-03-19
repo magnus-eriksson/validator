@@ -91,13 +91,35 @@ class Tester
 
 
     /**
-     * Add a ruleset
-     * @param Ruleset $set
+     * Add one or multiple rulesets
+     * 
+     * @param  array|Rules\Ruleset  $set  One Ruleset or List of Rulesets 
+     * @return $this
      */
-    public function addRuleset(Rules\Ruleset $set)
+    public function addRuleset($set)
     {
-        $set->setData($this->data);
-        $this->sets[] = $set;
+        if ($set instanceof Rules\Ruleset) {
+            $set->setData($this->data);
+            $this->sets[] = $set;
+            
+        } else if (is_array($set)) {
+
+            foreach($set as $rs) {
+                if (!$rs instanceof Rules\Ruleset) {
+                    throw new Exceptions\InvalidTypeException(
+                        "Rulesets must extend 'Maer\Validator\Rules\Ruleset'"
+                    );
+                }
+
+                $rs->setData($this->data);
+                $this->sets[] = $rs;
+            }
+        } else {
+            throw new Exceptions\InvalidTypeException(
+                "Rulesets must extend 'Maer\Validator\Rules\Ruleset'"
+            );
+        }
+
         return $this;
     }
 

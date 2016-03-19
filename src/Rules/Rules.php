@@ -69,7 +69,7 @@ class Rules extends Ruleset
      */
     public function ruleRegex($input, $regex)
     {
-        return preg_match($regex, $input);
+        return (bool) preg_match($regex, $input);
     }
 
 
@@ -80,7 +80,7 @@ class Rules extends Ruleset
      */
     public function ruleAlphaNumeric($input)
     {
-        return preg_match('/^(\w+)$/', $input);
+        return (bool) preg_match('/^(\w+)$/', $input);
     }
 
 
@@ -124,7 +124,7 @@ class Rules extends Ruleset
      */
     public function ruleEmail($input)
     {
-        return filter_var($input, FILTER_VALIDATE_EMAIL);
+        return filter_var($input, FILTER_VALIDATE_EMAIL) !== false;
     }
 
 
@@ -135,7 +135,7 @@ class Rules extends Ruleset
      */
     public function ruleIp($input)
     {
-        return filter_var($input, FILTER_VALIDATE_IP);
+        return filter_var($input, FILTER_VALIDATE_IP) !== false;
     }
 
 
@@ -146,7 +146,7 @@ class Rules extends Ruleset
      */
     public function ruleUrl($input)
     {
-        return filter_var($input, FILTER_VALIDATE_URL);
+        return filter_var($input, FILTER_VALIDATE_URL) !== false;
     }
 
 
@@ -168,9 +168,9 @@ class Rules extends Ruleset
      * @param  string   $match
      * @return boolean
      */
-    public function ruleNotEqual($input, $unmatch)
+    public function ruleNotEqual($input, $match)
     {
-        return $input != $unmatch;
+        return $input != $match;
     }
 
 

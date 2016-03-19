@@ -1,5 +1,6 @@
 # Validator
 
+[![Build Status](https://api.travis-ci.org/magnus-eriksson/validator.svg?branch=master)](https://travis-ci.org/magnus-eriksson/validator)
 
 #### So, why create yet another validation library?
 After searching for a simple standalone validation library, I've yet to find one that is actively maintained, doesn't require you to run through hoops to make it play nicely with your application or has a bunch of third party dependencies. And it's always fun to build stuff!
@@ -11,7 +12,7 @@ Let's get started!
 ## Installation
 You should probably use [composer](https://getcomposer.org):
 
-    composer require maer/validator dev-master
+    $ composer require maer/validator dev-master
 
 _Change `dev-master` to the latest tagged release_
 

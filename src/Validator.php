@@ -4,6 +4,7 @@ class Validator
 {
     protected $sets      = [];
     protected $messages  = [];
+    protected $ruleSets  = [];
 
 
     /**
@@ -20,8 +21,35 @@ class Validator
         $this->messages = is_file($path.$lang.'.php') 
             ? include $path.$lang.'.php' 
             : include $path.'en.php';
+    
+        $this->addRuleset(new Rules\Rules);
     }
 
+    
+    /**
+     * Add one or multiple rulesets
+     * 
+     * @param array|Rules\Ruleset   $set    One Ruleset or List of Rulesets 
+     */
+    public function addRuleset($set)
+    {
+        if ($set instanceof Rules\Ruleset) {
+            $this->ruleSets[] = $set;
+
+        } else if (is_array($set)) {
+
+            foreach($set as $rs) {
+                if (!$rs instanceof Rules\Ruleset) {
+                    throw new Exceptions\InvalidTypeException(
+                        "Rulesets must extend 'Maer\Validator\Rules\Ruleset'"
+                    );
+                }
+
+                $this->ruleSets[] = $rs;
+            }
+        }
+        
+    }
 
     /**
      * Get a new Tester instance
@@ -38,7 +66,7 @@ class Validator
             array_merge($this->messages, $messages)
         );
         
-        return $validation->addRuleset(new Rules\Rules);
+        return $validation->addRuleset($this->ruleSets);
 
     }
 }
