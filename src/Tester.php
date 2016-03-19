@@ -14,11 +14,11 @@ class Tester
      * @param array $data   Data to validate
      * @param array $rules  Rules to match
      */
-    public function __construct(array &$data, array &$rules, array &$messages)
+    public function __construct(array $data, array $rules, array $messages = [])
     {
-        $this->data     = &$data;
-        $this->rules    = &$rules;
-        $this->messages = &$messages;
+        $this->data     = $data;
+        $this->rules    = $rules;
+        $this->messages = $messages;
     }
 
 
