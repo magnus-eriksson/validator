@@ -218,7 +218,11 @@ class Tester
         $args     = [];
 
         if (!empty($parts[1])) {
-            $args = explode(',', $parts[1]);
+            if ($ruleName == 'regex') {
+                $args = [$parts[1]];
+            } else {
+                $args = explode(',', $parts[1]);
+            }
         }
 
         return [$ruleName, $args];
