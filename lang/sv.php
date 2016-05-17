@@ -6,7 +6,7 @@
 
 return [
 
-    'required'      => "%s är obligatorislt",
+    'required'      => "%s är obligatorisk",
     'minLength'     => "%s måste bestå av minst %d tecken",
     'maxLength'     => "%s får max bestå av %d tecken",
     'minSize'       => "%s måste ha ett värde av minst %d",
