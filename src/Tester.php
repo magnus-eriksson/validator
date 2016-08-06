@@ -154,7 +154,7 @@ class Tester
         // Check if we have a 'required' rule
         $required = in_array('required', $rules) !== false;
 
-        if (!$required && is_null($value)) {
+        if (!$required && empty($value)) {
             // Since the field isn't required and we don't have any
             // value, let's skip the validation.
             return;

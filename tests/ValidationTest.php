@@ -13,6 +13,47 @@ class ValidationTest extends PHPUnit_Framework_TestCase
         $this->validator = new Maer\Validator\Validator();
     }
 
+    public function testRequired()
+    {
+        // Round 1
+        $v = $this->validator->make([
+                'field_1'   => 'passes',
+                'field_2'   => 1234,
+                'field_3'   => null,
+                'field_4'   => '',
+            ],
+            [
+                'field_1' => ['minLength:5'],
+                'field_2' => ['integer'],
+                'field_3' => ['email'],
+                'field_4' => ['ip'],
+                'field_5' => ['url'],
+            ]
+        );
+
+        $result = $v->passes();
+        $this->assertTrue($result, "required passes: " . implode(', ', $v->errors()->all()));
+
+        // Round 2
+        $v = $this->validator->make([
+                'field_1'   => 'fail',
+                'field_2'   => null,
+                'field_3'   => 'fail',
+                'field_4'   => '',
+            ],
+            [
+                'field_1' => ['minLength:5'],
+                'field_2' => ['required', 'minLength:5'],
+                'field_3' => ['required', 'url'],
+                'field_4' => ['required', 'integer'],
+                'field_5' => ['required'],
+            ]
+        );
+
+        $result = $v->passes();
+        $this->assertFalse($result, "required fails: " . implode(', ', $v->errors()->all()));
+    }
+
 
     public function testMinMaxLength()
     {
