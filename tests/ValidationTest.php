@@ -5,8 +5,14 @@
  */
 class ValidationTest extends PHPUnit_Framework_TestCase
 {
- 
+
     public $validator;
+    protected $data = [
+        'fieldInt'  => 12345,
+        'fieldStr'  => "hello",
+        'fieldNull' => null,
+        'fieldZero' => 0,
+    ];
 
     public function __construct()
     {
@@ -15,82 +21,79 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 
     public function testRequired()
     {
-        // Round 1
-        $v = $this->validator->make([
-                'field_1'   => 'passes',
-                'field_2'   => 1234,
-                'field_3'   => null,
-                'field_4'   => '',
-            ],
-            [
-                'field_1' => ['minLength:5'],
-                'field_2' => ['integer'],
-                'field_3' => ['email'],
-                'field_4' => ['ip'],
-                'field_5' => ['url'],
-            ]
-        );
+        // Test 1
+        $result = $this->validator->make($this->data, [
+            'fieldNull' => ['required'],
+            'fieldInt'  => ['required', 'minSize:10000']
+        ]);
 
-        $result = $v->passes();
-        $this->assertTrue($result, "required passes: " . implode(', ', $v->errors()->all()));
+        $this->assertTrue($result->passes(), 'required 1');
 
-        // Round 2
-        $v = $this->validator->make([
-                'field_1'   => 'fail',
-                'field_2'   => null,
-                'field_3'   => 'fail',
-                'field_4'   => '',
-            ],
-            [
-                'field_1' => ['minLength:5'],
-                'field_2' => ['required', 'minLength:5'],
-                'field_3' => ['required', 'url'],
-                'field_4' => ['required', 'integer'],
-                'field_5' => ['required'],
-            ]
-        );
+        // Test 2
+        $result = $this->validator->make($this->data, [
+            'fieldNonExisting' => ['required']
+        ]);
 
-        $result = $v->passes();
-        $this->assertFalse($result, "required fails: " . implode(', ', $v->errors()->all()));
+        $this->assertFalse($result->passes(), "required 2");
+
+        // Test 3
+        $result = $this->validator->make($this->data, [
+            'fieldStr' => ['required', 'minLength:50']
+        ]);
+
+        $this->assertFalse($result->passes(), "required 3");
     }
 
-
-    public function testMinMaxLength()
+    public function testAllowEmpty()
     {
-        $v = $this->validator->make([
-                'field_1'   => 'working_field',
-                'field_2'   => 'failing_field'
-            ],
-            [
-                'field_1' => ['required', 'minLength:10'],
-                'field_2' => ['required', 'maxLength:5'],
-            ]
-        );
+        // Test 1
+        $result = $this->validator->make($this->data, [
+            'fieldNull' => ['required', 'allowEmpty', 'minLength:20'],
+            'fieldZero' => ['required', 'allowEmpty', 'minSize:10'],
+        ]);
 
-        $result = $v->passes();
-        $this->assertFalse($result, "min- and maxLength-test");
+        $this->assertTrue($result->passes(), 'allow empty 1');
+
+        // Test 2
+        $result = $this->validator->make($this->data, [
+            'fieldNull' => ['minLength:20'],
+        ]);
+
+        $this->assertFalse($result->passes(), 'allow empty 2');
+
+        // Test 3
+        $result = $this->validator->make($this->data, [
+            'fieldZero' => ['minSize:20'],
+        ]);
+
+        $this->assertFalse($result->passes(), 'allow empty 3');
     }
- 
 
     public function testErrorMessage()
     {
-        $v = $this->validator->make([
-                'field_1'   => 'failing_field',
-                'field_2'   => 'failing_field'
-            ],
+        $result = $this->validator->make($this->data,
             [
-                'field_1' => ['required', 'integer'],
-                'field_2' => ['required', 'integer'],
+                'fieldStr' => ['required', 'integer'],
             ],
             [
                 'integer' => 'integer_test'
             ]
         );
 
-        $result = $v->passes();
-        $this->assertFalse($result, "Rule should fail");
-        $this->assertEquals('integer_test', $v->errors->get('field_1'), 'Test custom rule message');
-        $this->assertEquals('integer_test', $v->errors->get('field_2'), 'Test custom rule message');
+        $this->assertFalse($result->passes(), "Rule should fail");
+        $this->assertEquals('integer_test', $result->errors->get('fieldStr'), 'Test custom rule message 1');
+
+        $result = $this->validator->make($this->data,
+            [
+                'fieldNonExisting' => ['required', 'integer'],
+            ],
+            [
+                'required' => 'required_test'
+            ]
+        );
+
+        $this->assertFalse($result->passes(), "Rule should fail");
+        $this->assertEquals('required_test', $result->errors->get('fieldNonExisting'), 'Test custom rule message 2');
     }
 
 }

@@ -3,17 +3,6 @@
 class Rules extends Ruleset
 {
     /**
-     * Check if the input isn't empty
-     * @param  mixed $input
-     * @return boolean
-     */
-    public function ruleRequired($input)
-    {
-        return !empty($input);
-    }
-
-
-    /**
      * Validate string minimum length
      * @param  string   $input
      * @param  integer  $minLength

@@ -129,7 +129,8 @@ If the `company_name` fails, you will get a nicer message: "The field Company Na
 
 |Rule                           |  Description                                              |
 |-------------------------------|-----------------------------------------------------------|
-| **required**                  | Checks if the input exists and isn't null                 |
+| **required**                  | The key must exist in the data array                      |
+| **allowEmpty**                | Input can be empty, regardless other rules                |
 | **minLength:**_arg_           | Input must be more or equal in length                     |
 | **maxLenght:**_arg_           | Input must be less or equal in length                     |
 | **minSize:**_arg_             | Input must have a value of more or equal                  |
@@ -152,6 +153,10 @@ If the `company_name` fails, you will get a nicer message: "The field Company Na
 
 A note about the **email, url** and **ip** rules, they do not check if they exist. They only check that the format is valid for their respective types.
 
+#### A note about `required` & `allowEmpty`
+When a field is set as `required`, the field _must_ exist in the data array and is evaluated with `array_key_exists()`.
+
+If a field is set as `allowEmpty`, and the value is empty (evaluated with `empty($value)`), the field will pass an all other rules for that field will be ignored.
 
 ## Custom rules
 It wouldn't be very customizable if you couldn't add your own validation rules.
@@ -166,8 +171,14 @@ class MyRules extends Maer\Validator\Rules\Ruleset
     public function ruleMyCoolRule($input, $arg)
     {
         // Do some awesome validation
-        return true/false;
-    } 
+        if ($input == 'chuck') {
+            return true;
+        }
+
+        // On fail, return a default error message. The %s will be
+        // replaced with the field name/nice name.
+        return "The field %s must be chuck";
+    }
 }
 ```
 
@@ -177,8 +188,7 @@ The `$input` is the value to validate. The `$arg` is the rule argument (omit thi
 The method must be prepended by the word "rule" (to eliminate any clashes with reserved keywords) and the first letter in the actual name must be a capital letter. Other than that, you're the boss.
 
 #### Response
-To make the rule fail, it must return `false` (strict checking). All other responses will count as a pass.
-
+To make the rule pass, it must return `true` (strict type checking). If the rule fails, you can return a default error message instead, as the example above shows.
 
 #### Register and use our new ruleset
 
@@ -190,6 +200,16 @@ $v = $validator->make($data, $rules);
 $v->addRuleset(new MyRules);
 ```
 
-Now you're ready to validate your data with your new rule: `myCoolRule:something`.
+Now you're ready to validate your data with your new rule:
+
+    $rules = [
+        'field_name': ['myCoolRule:someOptionalArgument']
+    ];
+
 
 You can add multiple rulesets to your validation instance. In case several rules in different ruleset shares the same name, the rule from the first registered ruleset will be used. This also means that none of the default rules can be overridden.
+
+## Note
+If you have any questions, suggestions or issues, let me know!
+
+Happy coding!

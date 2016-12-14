@@ -34,7 +34,7 @@ class Tester
 
         $errors = [];
         foreach($this->rules as $field => $rules) {
-            
+
             if (!is_array($rules)) {
                 throw new Exceptions\InvalidFormatException('Excpected Array, got ' . gettype($rules));
             }
@@ -92,8 +92,8 @@ class Tester
 
     /**
      * Add one or multiple rulesets
-     * 
-     * @param  array|Rules\Ruleset  $set  One Ruleset or List of Rulesets 
+     *
+     * @param  array|Rules\Ruleset  $set  One Ruleset or List of Rulesets
      * @return $this
      */
     public function addRuleset($set)
@@ -101,7 +101,7 @@ class Tester
         if ($set instanceof Rules\Ruleset) {
             $set->setData($this->data);
             $this->sets[] = $set;
-            
+
         } else if (is_array($set)) {
 
             foreach($set as $rs) {
@@ -148,25 +148,41 @@ class Tester
     {
         // Get the field value from the data array
         $value = array_key_exists($field, $this->data)
-            ? $this->data[$field] 
+            ? $this->data[$field]
             : null;
 
         // Check if we have a 'required' rule
         $required = in_array('required', $rules) !== false;
-
-        if (!$required && empty($value)) {
-            // Since the field isn't required and we don't have any
-            // value, let's skip the validation.
+        if (!$required && !array_key_exists($field, $this->data)) {
+            // If the field isn't required, skip rule checking if the
+            // field doesn't exist.
             return;
         }
 
+        if ($required && !array_key_exists($field, $this->data)) {
+            return sprintf($this->message('required', "The field %s is invalid"), $field);
+        }
+
+        // Check if we allow empty values (null, 0 etc...)
+        $allowEmpty = in_array('allowEmpty', $rules) !== false;
+        if ($allowEmpty && empty($value)) {
+            return;
+        }
+
+        // The above rules are meta rules without any real implementations
+        $metaRules = ['required', 'allowEmpty'];
+
         foreach($rules as $rule) {
+            if (in_array($rule, $metaRules)) {
+                // Just ignore the meta rules
+                continue;
+            }
 
             list($ruleName, $args) = $this->parseRule($rule);
-            
+
             $method = 'rule' . ucfirst($ruleName);
 
-            // Prepend the value to the arguments list so we can 
+            // Prepend the value to the arguments list so we can
             // use the call_user_func_array with all the arguments required
             array_unshift($args, $value);
 
@@ -179,7 +195,7 @@ class Tester
                     break;
                 }
             }
-            
+
             if (!$set) {
                 throw new Exceptions\UnknownRuleException("Unknown rule '$method'");
             }
@@ -191,7 +207,7 @@ class Tester
                 $message = is_string($response)
                     ? $this->message($ruleName, $response)
                     : $this->message($ruleName, "The field %s is invalid");
-                
+
                 // Remove the first element (the field value) from the args list.
                 array_shift($args);
 
@@ -211,7 +227,7 @@ class Tester
      * @param  string   $rule
      * @return array
      */
-    protected function parseRule($rule) 
+    protected function parseRule($rule)
     {
         $parts    = explode(':', $rule, 2);
         $ruleName = $parts[0];

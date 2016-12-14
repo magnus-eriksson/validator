@@ -5,7 +5,7 @@
  */
 class RulesTest extends PHPUnit_Framework_TestCase
 {
- 
+
     public $v;
 
     public function __construct()
@@ -13,17 +13,6 @@ class RulesTest extends PHPUnit_Framework_TestCase
         $this->v = new Maer\Validator\Rules\Rules;
     }
 
-    public function testRequired()
-    {
-        $this->assertTrue(
-            $this->v->ruleRequired('Hello')
-        );
-
-        $this->assertFalse(
-            $this->v->ruleRequired('')
-        );
-    }
- 
     public function testMinLength()
     {
         $this->assertTrue(
@@ -76,7 +65,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleRegex("bl 1", "/^([a-z0-9]+)$/")
-        );    
+        );
     }
 
     public function testAlphaNumeric()
@@ -87,7 +76,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleAlphaNumeric("bl=1")
-        );    
+        );
     }
 
     public function testInteger()
@@ -98,7 +87,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleInteger("a")
-        );    
+        );
     }
 
     public function testFloat()
@@ -109,7 +98,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleFloat(5)
-        );    
+        );
     }
 
     public function testBoolean()
@@ -120,7 +109,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleBoolean("true")
-        );    
+        );
     }
 
     public function testEmail()
@@ -131,7 +120,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleEmail("foo@bar")
-        );    
+        );
     }
 
     public function testIp()
@@ -142,7 +131,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleIp("1.1.1")
-        );    
+        );
     }
 
     public function testUrl()
@@ -153,7 +142,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleUrl("foo.bar")
-        );    
+        );
     }
 
     public function testEqual()
@@ -164,7 +153,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleEqual("hello", "hell")
-        );    
+        );
     }
 
     public function testNotEqual()
@@ -175,7 +164,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleNotEqual("hello", "hello")
-        );    
+        );
     }
 
     public function testIn()
@@ -186,7 +175,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleIn("test4", ["test1", "test2", "test3"])
-        );    
+        );
     }
 
     public function testNotIn()
@@ -197,7 +186,7 @@ class RulesTest extends PHPUnit_Framework_TestCase
 
         $this->assertFalse(
             $this->v->ruleNotIn("test2", ["test1", "test2", "test3"])
-        );    
+        );
     }
 
 }
