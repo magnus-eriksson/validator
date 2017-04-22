@@ -58,8 +58,44 @@ class Validator
      * @param  array  $messages
      * @return Tester
      */
-    public function make(array $data, array $rules, array $messages = [])
+    public function make($data, array $rules, array $messages = [])
     {
+        if(!is_array($data)) // if data been passed as std objects convert them back to array
+            $data = (array)$data;
+
+        /*
+        *
+        * This allows rules to be defined all at once as an array value seperated by a '|'
+        * E.g:
+        * $rules = [
+        *   'name'       => 'required|minLength:2|maxLength:32',
+        *   'status'     => 'required|in:cool,awesome,something else',
+        *   'email'      => 'required|email',
+        *   'won_fights' => 'required|integer|as:Won fights'
+        * ];
+        *
+        */
+        foreach($rules as $field => $markedRules)
+        {
+            if(!is_string($markedRules)) // skip if rules are defined as array keys ['required', 'email']
+                continue;
+
+            $tempRules = [];
+
+            foreach(explode('|', $markedRules) as $rule)
+            {
+                if(substr($rule, 0, 3) == 'as:')
+                {
+                    $alias           = explode('as:', $rule, 2)[1];
+                    $tempRules['as'] = $alias;
+                }
+                else
+                    $tempRules[] = $rule;
+            }
+
+            $rules[$field] = $tempRules;
+        }
+        
         $validation = new Tester(
             $data, 
             $rules, 
