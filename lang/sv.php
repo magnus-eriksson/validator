@@ -5,7 +5,6 @@
  */
 
 return [
-
     'required'      => "%s är obligatorisk",
     'minLength'     => "%s måste bestå av minst %d tecken",
     'maxLength'     => "%s får max bestå av %d tecken",
@@ -23,5 +22,4 @@ return [
     'notEqual'      => "%s får inte vara samma som %s",
     'in'            => "%s måste finnas med i listan",
     'notIn'         => "%s får inte finnas mer i listan",
-
 ];

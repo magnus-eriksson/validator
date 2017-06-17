@@ -33,8 +33,7 @@ class Tester
         }
 
         $errors = [];
-        foreach($this->rules as $field => $rules) {
-
+        foreach ($this->rules as $field => $rules) {
             if (!is_array($rules)) {
                 throw new Exceptions\InvalidFormatException('Excpected Array, got ' . gettype($rules));
             }
@@ -45,12 +44,11 @@ class Tester
                 unset($rules['as']);
             }
 
-            $response      = $this->runRules($rules, $field, $name);
+            $response = $this->runRules($rules, $field, $name);
 
             if (!empty($response)) {
                 $errors[$field] = $response;
             }
-
         }
 
         $this->errors = new Errors($errors);
@@ -101,10 +99,8 @@ class Tester
         if ($set instanceof Rules\Ruleset) {
             $set->setData($this->data);
             $this->sets[] = $set;
-
         } else if (is_array($set)) {
-
-            foreach($set as $rs) {
+            foreach ($set as $rs) {
                 if (!$rs instanceof Rules\Ruleset) {
                     throw new Exceptions\InvalidTypeException(
                         "Rulesets must extend 'Maer\Validator\Rules\Ruleset'"
@@ -172,7 +168,7 @@ class Tester
         // The above rules are meta rules without any real implementations
         $metaRules = ['required', 'allowEmpty'];
 
-        foreach($rules as $rule) {
+        foreach ($rules as $rule) {
             if (in_array($rule, $metaRules)) {
                 // Just ignore the meta rules
                 continue;
@@ -189,7 +185,7 @@ class Tester
             // Loop through all registered rule sets and use the first
             // set we find that has this rule
             $set = null;
-            foreach($this->sets as $ruleSet) {
+            foreach ($this->sets as $ruleSet) {
                 if (method_exists($ruleSet, $method)) {
                     $set = $ruleSet;
                     break;
@@ -216,7 +212,6 @@ class Tester
                 array_unshift($args, $message, $name);
 
                 return call_user_func_array('sprintf', $args);
-
             }
         }
     }
@@ -243,7 +238,4 @@ class Tester
 
         return [$ruleName, $args];
     }
-
-
 }
-

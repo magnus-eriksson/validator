@@ -25,7 +25,7 @@ class Errors
     public function get($field)
     {
         return $this->has($field)
-            ? $this->errors[$field] 
+            ? $this->errors[$field]
             : false;
     }
 

@@ -1,3 +1,5 @@
 <?php namespace Maer\Validator\Exceptions;
 
-class InvalidTypeException extends \Exception {}
+class InvalidTypeException extends \Exception
+{
+}

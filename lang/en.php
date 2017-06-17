@@ -5,7 +5,6 @@
  */
 
 return [
-
     'required'      => "The field %s is required",
     'minLength'     => "The field %s must be at least %d characters",
     'maxLength'     => "The field %s must be max %d characters",
@@ -23,5 +22,4 @@ return [
     'notEqual'      => "The field %s must not match %s",
     'in'            => "The field %s does not match any of the required values",
     'notIn'         => "The field %s may not match any of the values",
-
 ];

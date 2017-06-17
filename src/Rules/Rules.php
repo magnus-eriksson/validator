@@ -221,5 +221,4 @@ class Rules extends Ruleset
 
         return !in_array($input, $params);
     }
-
 }
