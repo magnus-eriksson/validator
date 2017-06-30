@@ -1,6 +1,6 @@
 <?php namespace Maer\Validator;
 
-class Validator
+class Validator implements ValidatorInterface
 {
     /**
      * Error messages
@@ -67,7 +67,7 @@ class Validator
      * @param  array  $data
      * @param  array  $rules
      * @param  array  $messages
-     * @return Tester
+     * @return TesterInterface
      */
     public function make(array $data, array $rules, array $messages = [])
     {

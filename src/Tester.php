@@ -1,6 +1,6 @@
 <?php namespace Maer\Validator;
 
-class Tester
+class Tester implements TesterInterface
 {
     protected $passes    = null;
     protected $data      = [];
