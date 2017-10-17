@@ -96,4 +96,21 @@ class ValidationTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('required_test', $result->errors->get('fieldNonExisting'), 'Test custom rule message 2');
     }
 
+    public function testTestFail()
+    {
+        $response = $this->validator->test('integer', 'abc');
+        $this->assertFalse($response, 'test(integer) should return false');
+    }
+
+    public function testTestSuccess()
+    {
+        $response = $this->validator->test('integer', 123);
+        $this->assertTrue($response, 'test(integer) should return true');
+    }
+
+    public function testTestErrorMessage()
+    {
+        $response = $this->validator->test('integer', 'abc', true);
+        $this->assertInternalType('string', $response, 'test(integer) should return error message');
+    }
 }

@@ -64,6 +64,7 @@ class Validator implements ValidatorInterface
 
     /**
      * Get a new Tester instance
+     *
      * @param  array  $data
      * @param  array  $rules
      * @param  array  $messages
@@ -78,5 +79,26 @@ class Validator implements ValidatorInterface
         );
 
         return $validation->addRuleset($this->ruleSets);
+    }
+
+
+    /**
+     * Test one rule directly
+     *
+     * @param  string  $rule
+     * @param  mixed   $value
+     * @param  boolean $returnErrorMessage
+     * @return boolean|message
+     */
+    public function test($rule, $value, $returnErrorMessage = false)
+    {
+        $tester = $this->make([$rule => $value], [$rule => [$rule]]);
+        if ($tester->passes()) {
+            return true;
+        }
+
+        $errors = $returnErrorMessage ? $tester->errors->all() : [];
+
+        return $errors ? array_pop($errors) : false;
     }
 }

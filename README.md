@@ -7,7 +7,20 @@ After searching for a simple standalone validation library, I've yet to find one
 
 This library is ment to be very customizable and easy to fit into most application without too much work.
 
-Let's get started!
+
+* [Installation](#installation)
+* [Simple example](#simple-example)
+* [Get errors](#get-errors)
+* [Custom error messages](#custom-error-messages)
+* [Use nice field names](#use-nice-field-names)
+* [Available rules](#available-rules)
+* [Custom rules](#custom-rules)
+    * [Define the rule](#define-the-rule)
+    * [Naming](#naming)
+    * [Response](#response)
+    * [Rulesets](#register-and-use-our-new-ruleset)
+* [Quicktest a value](#quicktest-a-value)
+
 
 ## Installation
 You should probably use [composer](https://getcomposer.org):
@@ -208,6 +221,25 @@ Now you're ready to validate your data with your new rule:
 
 
 You can add multiple rulesets to your validation instance. In case several rules in different ruleset shares the same name, the rule from the first registered ruleset will be used. This also means that none of the default rules can be overridden.
+
+## Quicktest a value
+
+Sometimes you just want to test a single value against one specific rule. To do this, you can use the `$validator->test()`-method:
+
+```php
+if (!$validator->test('email', 'some-invalid(a)emailaddress')) {
+    echo "It failed :(";
+}
+
+// The test() method returns a boolean as default.
+// To get the rules error message, pass true as the third argument.
+$response = $validator->test('email', 'some-invalid(a)emailaddress');
+if ($response !== true) {
+    echo $response;
+}
+```
+
+If you've added your own rule sets, they will also be available through the `test()`-method.
 
 ## Note
 If you have any questions, suggestions or issues, let me know!

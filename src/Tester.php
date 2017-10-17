@@ -174,45 +174,55 @@ class Tester implements TesterInterface
                 continue;
             }
 
-            list($ruleName, $args) = $this->parseRule($rule);
+            $response = $this->runRule($rule, $value, $name);
 
-            $method = 'rule' . ucfirst($ruleName);
-
-            // Prepend the value to the arguments list so we can
-            // use the call_user_func_array with all the arguments required
-            array_unshift($args, $value);
-
-            // Loop through all registered rule sets and use the first
-            // set we find that has this rule
-            $set = null;
-            foreach ($this->sets as $ruleSet) {
-                if (method_exists($ruleSet, $method)) {
-                    $set = $ruleSet;
-                    break;
-                }
-            }
-
-            if (!$set) {
-                throw new Exceptions\UnknownRuleException("Unknown rule '$method'");
-            }
-
-            $response = call_user_func_array([$set, $method], $args);
             if ($response !== true) {
-                // The rule validation failed
-
-                $message = is_string($response)
-                    ? $this->message($ruleName, $response)
-                    : $this->message($ruleName, "The field %s is invalid");
-
-                // Remove the first element (the field value) from the args list.
-                array_shift($args);
-
-                // Prepend the array with the message so we can use sprintf to
-                // inject the field name and use other args.
-                array_unshift($args, $message, $name);
-
-                return call_user_func_array('sprintf', $args);
+                return $response;
             }
+        }
+    }
+
+
+    protected function runRule($rule, $value, $name)
+    {
+        list($ruleName, $args) = $this->parseRule($rule);
+
+        $method = 'rule' . ucfirst($ruleName);
+
+        // Prepend the value to the arguments list so we can
+        // use the call_user_func_array with all the arguments required
+        array_unshift($args, $value);
+
+        // Loop through all registered rule sets and use the first
+        // set we find that has this rule
+        $set = null;
+        foreach ($this->sets as $ruleSet) {
+            if (method_exists($ruleSet, $method)) {
+                $set = $ruleSet;
+                break;
+            }
+        }
+
+        if (!$set) {
+            throw new Exceptions\UnknownRuleException("Unknown rule '$method'");
+        }
+
+        $response = call_user_func_array([$set, $method], $args);
+        if ($response !== true) {
+            // The rule validation failed
+
+            $message = is_string($response)
+                ? $this->message($ruleName, $response)
+                : $this->message($ruleName, "The field %s is invalid");
+
+            // Remove the first element (the field value) from the args list.
+            array_shift($args);
+
+            // Prepend the array with the message so we can use sprintf to
+            // inject the field name and use other args.
+            array_unshift($args, $message, $name);
+
+            return call_user_func_array('sprintf', $args);
         }
     }
 
