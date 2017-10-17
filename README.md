@@ -233,7 +233,7 @@ if (!$validator->test('email', 'some-invalid(a)emailaddress')) {
 
 // The test() method returns a boolean as default.
 // To get the rules error message, pass true as the third argument.
-$response = $validator->test('email', 'some-invalid(a)emailaddress');
+$response = $validator->test('email', 'some-invalid(a)emailaddress', true);
 if ($response !== true) {
     echo $response;
 }
