@@ -132,11 +132,13 @@ class ValidationTest extends PHPUnit_Framework_TestCase
         $v = $this->validator->make(['test' => 'chuckie'], $rules);
         $this->assertEquals(false, $v->passes());
         $errors = $v->errors()->all();
-        $this->assertEquals('test failed', $errors['test'] ?? 'No error found');
+        $error = isset($errors['test']) ? $errors['test'] : 'No error found';
+        $this->assertEquals('test failed', $error);
 
         $v = $this->validator->make(['test' => 'chuck'], $rulesMulti, ['minLength' => 'invalid length']);
         $this->assertEquals(false, $v->passes());
         $errors = $v->errors()->all();
-        $this->assertEquals('invalid length', $errors['test'] ?? 'No error found');
+        $error = isset($errors['test']) ? $errors['test'] : 'No error found';
+        $this->assertEquals('invalid length', $error);
     }
 }
