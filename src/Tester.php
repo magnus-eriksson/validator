@@ -224,6 +224,8 @@ class Tester implements TesterInterface
 
             return call_user_func_array('sprintf', $args);
         }
+
+        return true;
     }
 
 

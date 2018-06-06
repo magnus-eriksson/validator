@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/CustomRules.php';
 
 /**
  * @coversDefaultClass \Maer\Validator\Validator
@@ -17,6 +18,7 @@ class ValidationTest extends PHPUnit_Framework_TestCase
     public function __construct()
     {
         $this->validator = new Maer\Validator\Validator();
+        $this->validator->addRuleset(new CustomRules);
     }
 
     public function testRequired()
@@ -112,5 +114,29 @@ class ValidationTest extends PHPUnit_Framework_TestCase
     {
         $response = $this->validator->test('integer', 'abc', true);
         $this->assertInternalType('string', $response, 'test(integer) should return error message');
+    }
+
+    public function testCustomRules()
+    {
+        $rules = [
+            'test' => ['testChuck'],
+        ];
+
+        $rulesMulti = [
+            'test' => ['testChuck', 'minLength: 20'],
+        ];
+
+        $v = $this->validator->make(['test' => 'chuck'], $rules);
+        $this->assertEquals(true, $v->passes());
+
+        $v = $this->validator->make(['test' => 'chuckie'], $rules);
+        $this->assertEquals(false, $v->passes());
+        $errors = $v->errors()->all();
+        $this->assertEquals('test failed', $errors['test'] ?? 'No error found');
+
+        $v = $this->validator->make(['test' => 'chuck'], $rulesMulti, ['minLength' => 'invalid length']);
+        $this->assertEquals(false, $v->passes());
+        $errors = $v->errors()->all();
+        $this->assertEquals('invalid length', $errors['test'] ?? 'No error found');
     }
 }
