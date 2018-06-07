@@ -1,6 +1,6 @@
 <?php namespace Maer\Validator\Rules;
 
-class Rules extends Ruleset
+class Rules extends RuleSet
 {
     /**
      * Validate string minimum length

@@ -1,6 +1,6 @@
 <?php namespace Maer\Validator\Rules;
 
-abstract class Ruleset
+abstract class RuleSet
 {
     /**
      * The input data

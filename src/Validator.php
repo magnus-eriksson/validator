@@ -1,104 +1,59 @@
 <?php namespace Maer\Validator;
 
-class Validator implements ValidatorInterface
+class Validator
 {
     /**
-     * Error messages
+     * @var \Maer\Validator\Messages
+     */
+    protected $messages;
+
+    /**
      * @var array
      */
-    protected $messages  = [];
+    protected $sets;
 
     /**
-     * Added rule sets
-     * @var array
+     * @param array $lang Messages for the default rules
      */
-    protected $ruleSets  = [];
-
-
-    /**
-     * @param array $lang   Language file for the error messages
-     */
-    public function __construct($lang = 'en')
+    public function __construct()
     {
-        $this->setLanguage($lang);
-    }
-
-
-    /**
-     * Set and load the language
-     *
-     * @param string $lang
-     */
-    public function setLanguage($lang)
-    {
-        $path = __DIR__ . '/../lang/';
-        $this->messages = is_file($path.$lang.'.php')
-            ? include $path.$lang.'.php'
-            : include $path.'en.php';
-
-        $this->addRuleset(new Rules\Rules);
-    }
-
-
-    /**
-     * Add one or multiple rulesets
-     *
-     * @param array|Rules\Ruleset   $set    One Ruleset or List of Rulesets
-     */
-    public function addRuleset($set)
-    {
-        if ($set instanceof Rules\Ruleset) {
-            $this->ruleSets[] = $set;
-        } else if (is_array($set)) {
-            foreach ($set as $rs) {
-                if (!$rs instanceof Rules\Ruleset) {
-                    throw new Exceptions\InvalidTypeException(
-                        "Rulesets must extend 'Maer\Validator\Rules\Ruleset'"
-                    );
-                }
-
-                $this->ruleSets[] = $rs;
-            }
-        }
-    }
-
-    /**
-     * Get a new Tester instance
-     *
-     * @param  array  $data
-     * @param  array  $rules
-     * @param  array  $messages
-     * @return TesterInterface
-     */
-    public function make(array $data, array $rules, array $messages = [])
-    {
-        $validation = new Tester(
-            $data,
-            $rules,
-            array_merge($this->messages, $messages)
+        $this->messages = new Messages(
+            include __DIR__ . '/messages/en.php'
         );
 
-        return $validation->addRuleset($this->ruleSets);
+        $this->sets = new RuleSets([
+            new Rules\Rules
+        ]);
     }
 
+    /**
+     * Add messages
+     *
+     * @param array $messages
+     */
+    public function addMessages(array $messages)
+    {
+        $this->messages->addMessage($messages);
+    }
 
     /**
-     * Test one rule directly
+     * Add a rule set
      *
-     * @param  string  $rule
-     * @param  mixed   $value
-     * @param  boolean $returnErrorMessage
-     * @return boolean|message
+     * @param Rules\RuleSet $set
      */
-    public function test($rule, $value, $returnErrorMessage = false)
+    public function addRuleSet(Rules\RuleSet $set)
     {
-        $tester = $this->make([$rule => $value], [$rule => [$rule]]);
-        if ($tester->passes()) {
-            return true;
-        }
+        $this->sets->addRuleSet($set);
+    }
 
-        $errors = $returnErrorMessage ? $tester->errors->all() : [];
-
-        return $errors ? array_pop($errors) : false;
+    /**
+     * Get a new TestSuite to start validation
+     *
+     * @param  array  $data
+     * @return TestSuite
+     */
+    public function make(array $data)
+    {
+        return new TestSuite($data, $this->sets, $this->messages);
     }
 }

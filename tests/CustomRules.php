@@ -1,12 +1,16 @@
 <?php
 
-class CustomRules extends Maer\Validator\Rules\Ruleset
+class CustomRules extends Maer\Validator\Rules\RuleSet
 {
-    public function ruleTestChuck($input)
+    public function ruleFoo($input)
     {
-        if ($input == 'chuck') {
-            return true;
-        }
-        return "%s failed";
+        return $input === 'foo'
+            ? true
+            : "%s must be foo";
+    }
+
+    public function ruleFooBar($input)
+    {
+        return $input === 'foobar';
     }
 }

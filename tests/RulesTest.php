@@ -1,16 +1,35 @@
 <?php
+use Maer\Validator\Rules\Rules;
+use Maer\Validator\Validator;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @coversDefaultClass \Maer\Validator\Validator
  */
-class RulesTest extends PHPUnit_Framework_TestCase
+class RulesTest extends TestCase
 {
+    protected $v;
 
-    public $v;
-
-    public function __construct()
+    public function setUp()
     {
-        $this->v = new Maer\Validator\Rules\Rules;
+        $this->v = new Rules;
+    }
+
+    public function testRequired()
+    {
+        $validator = new Validator;
+
+        $v = $validator->make([
+            'foo' => 'bar'
+        ]);
+
+        $v->param('foo')->required();
+        $v->param('bar')->required();
+
+        $errors = $v->errors()->all();
+
+        $this->assertCount(1, $errors);
+        $this->assertEquals('The field bar is required', $errors['bar']);
     }
 
     public function testMinLength()
@@ -188,5 +207,4 @@ class RulesTest extends PHPUnit_Framework_TestCase
             $this->v->ruleNotIn("test2", ["test1", "test2", "test3"])
         );
     }
-
 }
