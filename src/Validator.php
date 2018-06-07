@@ -56,4 +56,21 @@ class Validator
     {
         return new TestSuite($data, $this->sets, $this->messages);
     }
+
+    /**
+     * Test a value against a rule straight away
+     *
+     * @param  mixed  $value
+     * @param  string $ruleInfo
+     * @return boolean
+     */
+    public function test($value, $rule, ...$args)
+    {
+        $suite = $this->make(['test' => $value]);
+        $param = $suite->param('test');
+
+        call_user_func_array([$param, $rule], $args);
+
+        return $suite->passes();
+    }
 }

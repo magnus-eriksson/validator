@@ -46,4 +46,16 @@ class ValidationTest extends TestCase
         $this->assertFalse($v->passes());
         $this->assertCount(2, $v->errors()->all());
     }
+
+    /**
+     * Test one value against one rule
+     */
+    public function testValidationTest()
+    {
+        $response = $this->validator->test('foo', 'minLength', 2);
+        $this->assertTrue($response);
+
+        $response = $this->validator->test('foo', 'minLength', 4);
+        $this->assertFalse($response);
+    }
 }

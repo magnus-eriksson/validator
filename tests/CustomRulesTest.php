@@ -55,4 +55,17 @@ class CustomRulesTest extends TestCase
         $errors = $v->errors()->all();
         $this->assertEquals('The field foo failed', $errors['foo'] ?? '');
     }
+
+
+    /**
+     * Test one value against a custom rule
+     */
+    public function testValidationTest()
+    {
+        $response = $this->validator->test('foo', 'foo');
+        $this->assertTrue($response);
+
+        $response = $this->validator->test('bar', 'foo');
+        $this->assertFalse($response);
+    }
 }
