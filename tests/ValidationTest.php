@@ -58,4 +58,28 @@ class ValidationTest extends TestCase
         $response = $this->validator->test('foo', 'minLength', 4);
         $this->assertFalse($response);
     }
+
+    /**
+     * Test passing in an array
+     */
+    public function testPassArrayArgument()
+    {
+        // Success
+        $v = $this->validator->make([
+            'foo' => 'bar',
+        ]);
+
+        $v->param('foo')->in(['test', 'bar']);
+
+        $this->assertTrue($v->passes());
+
+        // Fail
+        $v = $this->validator->make([
+            'foo' => 'bar',
+        ]);
+
+        $v->param('foo')->in(['test', 'example']);
+
+        $this->assertFalse($v->passes());
+    }
 }

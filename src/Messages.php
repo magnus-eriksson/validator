@@ -58,6 +58,7 @@ class Messages
     public function generate($message, $field, array $args = [])
     {
         array_unshift($args, $message, $field);
+
         return call_user_func_array('sprintf', $args);
     }
 }

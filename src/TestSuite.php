@@ -34,6 +34,11 @@ class TestSuite
     protected $params = [];
 
     /**
+     * @var array
+     */
+    protected $fieldNames = [];
+
+    /**
      * Validation state
      * @var null
      */
@@ -61,6 +66,22 @@ class TestSuite
     public function param($field)
     {
         return $this->params[$field] = new Param($field);
+    }
+
+    /**
+     * Set nice field names
+     *
+     * @param  array $fieldNames
+     * @return $this
+     */
+    public function fieldNames(array $fieldNames)
+    {
+        $this->fieldNames = array_replace_recursive(
+            $this->fieldNames,
+            $fieldNames
+        );
+
+        return $this;
     }
 
     /**
@@ -128,9 +149,11 @@ class TestSuite
      */
     protected function testParam($field, Param $param)
     {
+        $fieldName = $this->fieldNames[$field] ?? $field;
+
         if (!array_key_exists($field, $this->data)) {
             if ($param->isRequired()) {
-                return $this->messages->getRuleMessage('required', $field, []);
+                return $this->messages->getRuleMessage('required', $fieldName, []);
             }
 
             // The field doesn't exist but isn't required, so let's skip the
@@ -150,8 +173,8 @@ class TestSuite
 
                 // If we got a string back, use that as an error message
                 return is_string($response)
-                    ? $this->messages->generate($response, $field, $rule['args'])
-                    : $this->messages->getRuleMessage($rule['rule'], $field, $rule['args']);
+                    ? $this->messages->generate($response, $fieldName, $rule['args'])
+                    : $this->messages->getRuleMessage($rule['rule'], $fieldName, $rule['args']);
             }
         }
 

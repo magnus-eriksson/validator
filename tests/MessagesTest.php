@@ -28,6 +28,17 @@ class MessagesTest extends TestCase
     }
 
     /**
+     * Test checking individual messages
+     */
+    public function testCheckIndividualMessage()
+    {
+        $v = $this->validator->make(['foo' => 'bar']);
+        $v->param('foo')->equal('foo');
+
+        $this->assertTrue($v->errors()->has('foo'));
+    }
+
+    /**
      * Test overriding specific rule message
      */
     public function testOverrideRuleMessage()
@@ -42,6 +53,23 @@ class MessagesTest extends TestCase
         $errors = $v->errors()->all();
 
         $this->assertEquals('foo is not equal to cookie', $errors['foo'] ?? 'none');
+    }
+
+    /**
+     * Test nice field name
+     */
+    public function testNiceFieldName()
+    {
+        $v = $this->validator->make(['foo' => 'bar']);
+        $v->fieldNames([
+            'foo' => 'FooBar'
+        ]);
+
+        $v->param('foo')->equal('cookie');
+
+        $errors = $v->errors()->all();
+
+        $this->assertEquals('The field FooBar must match cookie', $errors['foo'] ?? 'none');
     }
 
     /**

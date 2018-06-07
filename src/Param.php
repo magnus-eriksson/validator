@@ -5,7 +5,7 @@ class Param
     /**
      * @var string
      */
-    protected $key;
+    protected $field;
 
     /**
      * Registered rules
@@ -19,11 +19,16 @@ class Param
     protected $required = false;
 
     /**
-     * @param string $key
+     * @var string
      */
-    public function __construct($key)
+    protected $niceName;
+
+    /**
+     * @param string $field
+     */
+    public function __construct($field)
     {
-        $this->key = $key;
+        $this->field = $field;
     }
 
     /**
