@@ -82,4 +82,30 @@ class ValidationTest extends TestCase
 
         $this->assertFalse($v->passes());
     }
+
+    /**
+     * Test alternative syntax
+     */
+    public function testAlternativeSyntax()
+    {
+        $rules = [
+            'foo' => ['required', 'minLength:4', 'in:barba,test'],
+            'bar' => ['required', 'email']
+        ];
+
+        // Success
+        $v = $this->validator->make(['foo' => 'barba', 'bar' => 'foo@bar.com'], $rules);
+
+        $this->assertTrue($v->passes());
+
+        // Fail
+        $v = $this->validator->make(['foo' => 'barr', 'bar' => 'foo'], $rules);
+
+        $this->assertFalse($v->passes());
+
+        $errors = $v->errors()->all();
+
+        $this->assertCount(2, $errors);
+
+    }
 }

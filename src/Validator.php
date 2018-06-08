@@ -49,11 +49,16 @@ class Validator
     /**
      * Get a new TestSuite to start validation
      *
-     * @param  array  $data
+     * @param  array $data
+     * @param  array $rules Pass this for alternative syntax
      * @return TestSuite
      */
-    public function make(array $data)
+    public function make(array $data, array $rules = [])
     {
+        if ($rules) {
+            return $this->alternativeSyntax($data, $rules);
+        }
+
         return new TestSuite($data, $this->sets, $this->messages);
     }
 
@@ -72,5 +77,31 @@ class Validator
         call_user_func_array([$param, $rule], $args);
 
         return $suite->passes();
+    }
+
+    /**
+     * Use array syntax for the rules
+     *
+     * @param  array $data
+     * @param  array $rules
+     * @return TestSuite
+     */
+    protected function alternativeSyntax($data, $rules)
+    {
+        $suite = $this->make($data);
+
+        foreach ($rules as $field => $item) {
+            $param = $suite->param($field);
+
+            foreach ($item as $itemRule) {
+                $parts = explode(':', $itemRule);
+                $rule  = $parts[0];
+                $args  = explode(',', $parts[1] ?? '');
+
+                call_user_func_array([$param, $rule], $args);
+            }
+        }
+
+        return $suite;
     }
 }
