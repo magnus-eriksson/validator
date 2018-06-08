@@ -52,6 +52,25 @@ $data = [
     'lost_fights' => -1
 ];
 
+// Adding rules - Method 1
+// ------------------------------------------------------------
+// This method allows you to define all your rules in an array:
+// ['key' => ['rule1', 'rule2:argument', 'rule3:argument1,argument2', etc]]
+
+$rules = [
+    'name'        => ['required','minLength:2','maxLength:32'],
+    'status'      => ['required','in:cool,awesome,something else'],
+    'email'       => ['required','email'],
+    'won_fights'  => ['required','integer'],
+    'lost_fights' => ['required','integer'],
+];
+
+$v = $validator->make($data, $rules);
+
+// Adding rules - Method 2
+// ------------------------------------------------------------
+// This method allows you to add the rules using method chaining
+
 $v = $validator->make($data);
 
 // Define validation rules for the different parameters
@@ -76,7 +95,9 @@ $v->param('lost_fights')
     ->required()
     ->integer();
 
+
 // Validate
+// ------------------------------------------------------------
 if ($v->passes()) {
     echo "Yay.. it passed!";
 } else {
@@ -84,6 +105,19 @@ if ($v->passes()) {
     var_dump($v->errors()->all());
 }
 ```
+
+#### Why two different ways of adding rules?
+
+I've found that there are pros and cons with both ways:
+
+**Using arrays**
+_Pros:_ This method allows you to define rules that can easily be reused for multiple validations. You can even store them in a config or similar.
+_Cons:_ Since you pass arguments as comma separated values, arguments can't contain commas. Sure, we could implement escaping etc, but that's a pain and error prone. Also, any argument would be sent in as a string, which makes it hard to do strict type checks.
+
+**Using methods**
+_Pros:_ This solves the cons with using arrays.
+_Cons:_ It's not as easy to reuse the rules. You would need to create a function/method to handle that.
+
 
 ## Get errors
 
@@ -239,7 +273,7 @@ class MyRules extends Maer\Validator\Rules\RuleSet
 }
 ```
 
-The `$input` is the value to validate. This value will automatically be injected to the rule. The above rule would be used like: `->myCoolRule($arg)`. You can of course add as many argument as you want.
+The `$input` is the value to validate. This value will automatically be injected to the rule. The above rule would be used like: `->myCoolRule($arg)` or `['myCoolRule:arg']`. You can of course add as many argument as you want.
 
 #### Naming
 The method must be prepended by the word "rule" (to eliminate any clashes with reserved keywords) and the first letter in the actual name must be a capital letter. Other than that, you're the boss.
