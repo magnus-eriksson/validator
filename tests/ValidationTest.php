@@ -106,6 +106,27 @@ class ValidationTest extends TestCase
         $errors = $v->errors()->all();
 
         $this->assertCount(2, $errors);
+    }
 
+    public function testCrossFieldTest()
+    {
+        $data = [
+            'name1' => 'foo',
+            'name2' => 'foo',
+        ];
+
+        // Success
+        $v = $this->validator->make($data);
+        $v->param('name2')->same('name1');
+
+        $this->assertTrue($v->passes());
+
+        // Success false
+        $data['name1'] = 'false';
+
+        $v = $this->validator->make($data);
+        $v->param('name2')->same('name1');
+
+        $this->assertFalse($v->passes());
     }
 }
