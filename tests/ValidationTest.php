@@ -52,10 +52,10 @@ class ValidationTest extends TestCase
      */
     public function testValidationTest()
     {
-        $response = $this->validator->test('foo', 'minLength', 2);
+        $response = $this->validator->test('foo')->minLength(2);
         $this->assertTrue($response);
 
-        $response = $this->validator->test('foo', 'minLength', 4);
+        $response = $this->validator->test('foo')->minLength(4);
         $this->assertFalse($response);
     }
 

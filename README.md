@@ -52,10 +52,9 @@ $data = [
     'lost_fights' => -1
 ];
 
-// Adding rules - Method 1
+
+// Using arrays
 // ------------------------------------------------------------
-// This method allows you to define all your rules in an array:
-// ['key' => ['rule1', 'rule2:argument', 'rule3:argument1,argument2', etc]]
 
 $rules = [
     'name'        => ['required','minLength:2','maxLength:32'],
@@ -67,13 +66,12 @@ $rules = [
 
 $v = $validator->make($data, $rules);
 
-// Adding rules - Method 2
+
+// Using method chaining
 // ------------------------------------------------------------
-// This method allows you to add the rules using method chaining
 
 $v = $validator->make($data);
 
-// Define validation rules for the different parameters
 $v->param('name')
     ->required()
     ->minLength(2)
@@ -189,7 +187,7 @@ $v = $validator->make($data);
 
 // Define the error messages the fields
 $v->fieldMessages([
-    'foo' => The field foo totally failed',
+    'foo' => 'The field foo totally failed',
     ...
 ]);
 
@@ -299,11 +297,9 @@ You can add multiple rule sets to your validation instance. In case several rule
 Sometimes you just want to test a single value against one specific rule. To do this, you can use the `$validator->test()`-method:
 
 ```php
-if (!$validator->test('email', 'some-invalid(a)emailaddress')) {
-    echo "It failed :(";
+if ($validator->test('foo@bar.com')->email()) {
+    echo "Correct!";
 }
-
-// The test() method returns a boolean.
 ```
 
 If you've added your own rule sets, they will also be available through the `test()`-method.

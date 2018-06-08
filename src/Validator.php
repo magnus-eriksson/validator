@@ -21,9 +21,7 @@ class Validator
             include __DIR__ . '/messages/en.php'
         );
 
-        $this->sets = new RuleSets([
-            new Rules\Rules
-        ]);
+        $this->sets = new RuleSets([new Rules\Rules]);
     }
 
     /**
@@ -69,14 +67,18 @@ class Validator
      * @param  string $ruleInfo
      * @return boolean
      */
-    public function test($value, $rule, ...$args)
+    public function test($value)
     {
+        return new Test($this->sets, $value);
+
+        /**
         $suite = $this->make(['test' => $value]);
         $param = $suite->param('test');
 
         call_user_func_array([$param, $rule], $args);
 
         return $suite->passes();
+        */
     }
 
     /**

@@ -62,10 +62,10 @@ class CustomRulesTest extends TestCase
      */
     public function testValidationTest()
     {
-        $response = $this->validator->test('foo', 'foo');
+        $response = $this->validator->test('foo')->foo();
         $this->assertTrue($response);
 
-        $response = $this->validator->test('bar', 'foo');
+        $response = $this->validator->test('bar')->foo();
         $this->assertFalse($response);
     }
 }
