@@ -1,109 +1,158 @@
 <?php namespace Maer\Validator;
 
+use Maer\Validator\Collections\RulesetCollection;
+use Maer\Validator\Collections\ValueCollection;
+use Maer\Validator\Rules\AbstractRuleset;
+
 class Validator
 {
     /**
-     * @var \Maer\Validator\Messages
+     * @var RulesetCollection
      */
-    protected $messages;
+    protected $rulesets;
 
     /**
+     * Predefined rule groups
+     *
      * @var array
      */
-    protected $sets;
+    protected $ruleGroups = [];
 
-    /**
-     * @param array $lang Messages for the default rules
-     */
+
     public function __construct()
     {
-        $this->messages = new Messages(
-            include __DIR__ . '/messages/en.php'
-        );
-
-        $this->sets = new RuleSets([new Rules\Rules]);
+        $this->rulesets = new RulesetCollection;
     }
 
-    /**
-     * Add messages
-     *
-     * @param array $messages
-     */
-    public function addMessages(array $messages)
-    {
-        $this->messages->addMessage($messages);
-    }
 
     /**
-     * Add a rule set
+     * Add a ruleset
      *
-     * @param Rules\RuleSet $set
+     * @param  AbstractRuleset $ruleset
+     *
+     * @return $this
      */
-    public function addRuleSet(Rules\RuleSet $set)
+    public function addRuleset(AbstractRuleset $ruleset): Validator
     {
-        $this->sets->addRuleSet($set);
+        $this->rulesets->add($ruleset);
+
+        return $this;
     }
 
+
     /**
-     * Get a new TestSuite to start validation
+     * Remove a ruleset
      *
-     * @param  array $data
-     * @param  array $rules Pass this for alternative syntax
-     * @return TestSuite
+     * @param  string $className Fully qualified class name (with namespaces)
+     *
+     * @return $this
      */
-    public function make(array $data, array $rules = [])
+    public function removeRuleset(string $className): Validator
     {
-        if ($rules) {
-            return $this->alternativeSyntax($data, $rules);
+        $this->rulesets->remove($className);
+
+        return $this;
+    }
+
+
+    /**
+     * Add a rule group
+     *  - A rule group is just a list of rules for a specific test
+     *
+     * @param  string $groupName
+     * @param  array  $rules
+     *
+     * @return Validator
+     */
+    public function addRuleGroup(string $groupName, array $rules): Validator
+    {
+        $this->ruleGroups[$groupName] = $rules;
+
+        return $this;
+    }
+
+
+    /**
+     * Remove a rule group
+     *
+     * @param  string $groupName
+     *
+     * @return Validator
+     */
+    public function removeRuleGroup(string $groupName): Validator
+    {
+        if (array_key_exists($groupName, $this->ruleGroups)) {
+            unset($this->ruleGroups[$groupName]);
         }
 
-        return new TestSuite($data, $this->sets, $this->messages);
+        return $this;
     }
 
-    /**
-     * Test a value against a rule straight away
-     *
-     * @param  mixed  $value
-     * @param  string $ruleInfo
-     * @return boolean
-     */
-    public function test($value)
-    {
-        return new Test($this->sets, $value);
-
-        /**
-        $suite = $this->make(['test' => $value]);
-        $param = $suite->param('test');
-
-        call_user_func_array([$param, $rule], $args);
-
-        return $suite->passes();
-        */
-    }
 
     /**
-     * Use array syntax for the rules
+     * Validate data using an added rule group
      *
-     * @param  array $data
-     * @param  array $rules
-     * @return TestSuite
+     * @param  iterable $values
+     * @param  string   $groupName
+     *
+     * @return Response
      */
-    protected function alternativeSyntax($data, $rules)
+    public function useRuleGroup(string $groupName, iterable $values): Response
     {
-        $suite = $this->make($data);
-
-        foreach ($rules as $field => $item) {
-            $param = $suite->param($field);
-
-            foreach ($item as $itemRule) {
-                $parts = explode(':', $itemRule);
-                $rule  = $parts[0];
-                $args  = explode(',', $parts[1] ?? '');
-
-                call_user_func_array([$param, $rule], $args);
-            }
+        if (!array_key_exists($groupName, $this->ruleGroups)) {
+            throw new \Exception("The rule group '{$groupName}' was not found");
         }
 
-        return $suite;
+        return (new BatchTest(
+            $this->ruleGroups[$groupName],
+            new ValueCollection($values),
+            $this->rulesets
+        ))->run();
+    }
+
+
+    /**
+     * Get a SingleTest instance for a specific value
+     *
+     * @param  mixed $value
+     *
+     * @return SingleTest
+     */
+    public function value($value): SingleTest
+    {
+        $values = new ValueCollection(['value' => $value]);
+
+        return new SingleTest('value', $values, $this->rulesets);
+    }
+
+
+    /**
+     * Validate the values against a list of rules
+     *
+     * @param  iterable $values
+     * @param  array    $rules
+     *
+     * @return Response
+     */
+    public function validate(array $rules, iterable $values): Response
+    {
+        return (new BatchTest(
+            $rules,
+            new ValueCollection($values),
+            $this->rulesets
+        ))->run();
+    }
+
+
+    /**
+     * Chain rules for a value
+     *
+     * @param  mixed $value
+     *
+     * @return Chain
+     */
+    public function chain($value): Chain
+    {
+        return new Chain($value, $this->rulesets);
     }
 }
