@@ -11,23 +11,20 @@ class RulesetsBag extends Bag
 
 
     /**
-     * Add a ruleset to the collection
+     * Add a new ruleset
      *
-     * @param  AbstractRuleset $ruleset
-     *
-     * @return $this
+     * @param string          $key
+     * @param AbstractRuleset $value
      */
-    public function register(string $key, AbstractRuleset $ruleset): Bag
+    public function add(string $key, $ruleset): Bag
     {
-        $key = get_class($ruleset);
+        if (!$ruleset instanceof AbstractRuleset) {
+            throw new \Exception("Rulesets must inherit " . AbstractRuleset::class);
+        }
+
         parent::add($key, $ruleset);
 
         return $this;
     }
 
-
-    public function add(string $key, $value): Bag
-    {
-        throw new \Exception("Use RulesetsBag::register to add new rulesets");
-    }
 }

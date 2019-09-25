@@ -22,8 +22,34 @@ class Test
         $this->values   = $values;
     }
 
-    public function __invoke(string $field, string $ruleString)
+    public function test(string $field, string $ruleString)
     {
+        [$method, $args] = $this->parseRuleString($ruleString);
 
+        $result = $this->rulesets->runRule($this->values, $field, $method, $args);
+
+        dd($result);
+    }
+
+
+    /**
+     * Parse a rule string into rule method and arguments
+     *
+     * @param  string $ruleString
+     *
+     * @return array
+     */
+    protected function parseRuleString(string $ruleString)
+    {
+        $parts = explode(':', $ruleString, 2);
+
+        if (!empty($parts[1])) {
+            $parts[1] = explode(',', $parts[1]);
+        }
+
+        return [
+            $parts[0],      // Rule name
+            $parts[1] ?? [] // Rule arguments
+        ];
     }
 }

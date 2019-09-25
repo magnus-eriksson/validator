@@ -64,6 +64,18 @@ class Validator
      */
     public function success(): bool
     {
+        $test = new Test($this->values, $this->rulesets);
+
+        foreach ($this->rules as $field => $rules) {
+            foreach ($rules as $key => $ruleString) {
+                if (is_numeric($key)) {
+                    continue;
+                }
+
+                $test->test($field, $ruleString);
+            }
+        }
+
         return true;
     }
 

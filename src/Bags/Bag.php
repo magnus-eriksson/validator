@@ -62,9 +62,11 @@ abstract class Bag
      */
     public function add(string $key, $value): Bag
     {
-        if ($this->isMutable()) {
-            $this->items[$key] = $value;
+        if ($this->isImmutable()) {
+            throw new \Exception("You can't add items to an immutable bag");
         }
+
+        $this->items[$key] = $value;
 
         return $this;
     }
@@ -78,7 +80,11 @@ abstract class Bag
      */
     public function remove(string $key): Bag
     {
-        if ($this->isMutable() && $this->has($key)) {
+        if ($this->isImmutable()) {
+            throw new \Exception("You can't delete items from an immutable bag");
+        }
+
+        if ($this->has($key)) {
             unset($this->items[$key]);
         }
 
