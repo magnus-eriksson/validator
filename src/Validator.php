@@ -1,158 +1,80 @@
-<?php namespace Maer\Validator;
+<?php namespace Valid;
 
-use Maer\Validator\Collections\RulesetCollection;
-use Maer\Validator\Collections\ValueCollection;
-use Maer\Validator\Rules\AbstractRuleset;
+use Valid\Bags\ErrorsBag;
+use Valid\Bags\RulesetsBag;
+use Valid\Bags\ValuesBag;
+use Valid\Rules\AbstractRuleset;
+use Valid\Rules\DefaultRuleset;
 
 class Validator
 {
     /**
-     * @var RulesetCollection
+     * @var ValuesBat
+     */
+    protected $values;
+
+
+    /**
+     * @var RulesetsBag
      */
     protected $rulesets;
 
     /**
-     * Predefined rule groups
-     *
+     * @var ErrorsBag
+     */
+    protected $errors;
+
+    /**
      * @var array
      */
-    protected $ruleGroups = [];
+    protected $rules;
 
 
-    public function __construct()
+    /**
+     * @param iterable $values
+     * @param array    $rules
+     */
+    public function __construct(iterable $values, array $rules)
     {
-        $this->rulesets = new RulesetCollection;
+        $this->values   = new ValuesBag($values);
+        $this->errors   = new ErrorsBag;
+        $this->rulesets = new RulesetsBag;
+        $this->rules    = $rules;
+
+        $this->addRuleset(new DefaultRuleset);
     }
 
 
     /**
      * Add a ruleset
      *
-     * @param  AbstractRuleset $ruleset
-     *
-     * @return $this
+     * @param AbstractRuleset $ruleset
      */
     public function addRuleset(AbstractRuleset $ruleset): Validator
     {
-        $this->rulesets->add($ruleset);
+        $this->rulesets->register(get_class($ruleset), $ruleset);
 
         return $this;
     }
 
-
     /**
-     * Remove a ruleset
+     * Check if the validation passed
      *
-     * @param  string $className Fully qualified class name (with namespaces)
-     *
-     * @return $this
+     * @return bool
      */
-    public function removeRuleset(string $className): Validator
+    public function success(): bool
     {
-        $this->rulesets->remove($className);
-
-        return $this;
+        return true;
     }
 
 
     /**
-     * Add a rule group
-     *  - A rule group is just a list of rules for a specific test
+     * Get the errors bag
      *
-     * @param  string $groupName
-     * @param  array  $rules
-     *
-     * @return Validator
+     * @return ErrorsBag
      */
-    public function addRuleGroup(string $groupName, array $rules): Validator
+    public function errors(): ErrorsBag
     {
-        $this->ruleGroups[$groupName] = $rules;
-
-        return $this;
-    }
-
-
-    /**
-     * Remove a rule group
-     *
-     * @param  string $groupName
-     *
-     * @return Validator
-     */
-    public function removeRuleGroup(string $groupName): Validator
-    {
-        if (array_key_exists($groupName, $this->ruleGroups)) {
-            unset($this->ruleGroups[$groupName]);
-        }
-
-        return $this;
-    }
-
-
-    /**
-     * Validate data using an added rule group
-     *
-     * @param  iterable $values
-     * @param  string   $groupName
-     *
-     * @return Response
-     */
-    public function useRuleGroup(string $groupName, iterable $values): Response
-    {
-        if (!array_key_exists($groupName, $this->ruleGroups)) {
-            throw new \Exception("The rule group '{$groupName}' was not found");
-        }
-
-        return (new BatchTest(
-            $this->ruleGroups[$groupName],
-            new ValueCollection($values),
-            $this->rulesets
-        ))->run();
-    }
-
-
-    /**
-     * Get a SingleTest instance for a specific value
-     *
-     * @param  mixed $value
-     *
-     * @return SingleTest
-     */
-    public function value($value): SingleTest
-    {
-        $values = new ValueCollection(['value' => $value]);
-
-        return new SingleTest('value', $values, $this->rulesets);
-    }
-
-
-    /**
-     * Validate the values against a list of rules
-     *
-     * @param  iterable $values
-     * @param  array    $rules
-     *
-     * @return Response
-     */
-    public function validate(array $rules, iterable $values): Response
-    {
-        return (new BatchTest(
-            $rules,
-            new ValueCollection($values),
-            $this->rulesets
-        ))->run();
-    }
-
-
-    /**
-     * Chain rules for a value
-     *
-     * @param  mixed $value
-     *
-     * @return Chain
-     */
-    public function chain($value): Chain
-    {
-        return new Chain($value, $this->rulesets);
+        return $this->errors;
     }
 }

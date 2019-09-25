@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Maer\\Validator\\": "src/"
+            "Valid\\": "src/"
         }
     }
 }
