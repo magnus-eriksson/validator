@@ -35,6 +35,13 @@ class MyRules extends \Maer\Validator\Sets\AbstractSet
 
         return "Input must be hello-world";
     }
+
+    public function rules(): array
+    {
+        return [
+            'myNewRule' => [$this, 'myRule'],
+        ];
+    }
 }
 
 $data = [
@@ -42,7 +49,7 @@ $data = [
 ];
 
 $rules = [
-    'foo' => ['myRule'],
+    'foo' => ['myNewRule'],
 ];
 
 $v = new Validator($data, $rules);
