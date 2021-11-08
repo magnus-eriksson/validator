@@ -1,6 +1,6 @@
 {
     "name": "maer/validator",
-    "description": "An easy and customizable validation library",
+    "description": "A simple validation library",
     "license": "MIT",
     "authors": [
         {
@@ -15,18 +15,15 @@
     },
     "minimum-stability": "stable",
     "require": {
-        "php": ">=7.0.0"
+        "php": ">=8.0.0"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.2",
-        "phpunit/phpunit": "^6.5"
+        "squizlabs/php_codesniffer": "^3.6"
     },
     "scripts": {
         "cs": "./vendor/bin/phpcs --standard=PSR2 --extensions=php --ignore=vendor/,tests/ -n -s ./",
-        "phpunit": "./vendor/bin/phpunit --strict-coverage --colors=always",
         "test": [
-            "@cs",
-            "@phpunit"
+            "@cs"
         ]
     }
 }

@@ -1,109 +1,150 @@
-<?php namespace Maer\Validator;
+<?php
+namespace Maer\Validator;
+
+use InvalidArgumentException;
+use Maer\Validator\Errors\ValidationErrors;
+use Maer\Validator\Params\Params;
+use Maer\Validator\Rules\ValidationRules;
+use Maer\Validator\Sets\AbstractSet;
+use Maer\Validator\Sets\DefaultSet;
 
 class Validator
 {
     /**
-     * @var \Maer\Validator\Messages
+     * @var Params
      */
-    protected $messages;
+    protected Params $params;
+
+    /**
+     * @var ValidationErrors
+     */
+    protected ValidationErrors $errors;
 
     /**
      * @var array
      */
-    protected $sets;
+    protected array $fieldErrors = [];
 
     /**
-     * @param array $lang Messages for the default rules
+     * @var ValidationRules
      */
-    public function __construct()
-    {
-        $this->messages = new Messages(
-            include __DIR__ . '/messages/en.php'
-        );
+    protected ValidationRules $rules;
 
-        $this->sets = new RuleSets([new Rules\Rules]);
+    /**
+     * @var array
+     */
+    protected array $sets = [];
+
+
+    /**
+     * @param array $params
+     * @param array $rules
+     * @param array $fieldErrors Custom field errors
+     */
+    public function __construct(array $params, array $rules, array $fieldErrors = [])
+    {
+        $this->params = new Params($params);
+        $this->rules  = new ValidationRules($rules);
+        $this->errors = new ValidationErrors;
+        $this->fieldErrors = $fieldErrors;
+
+        $this->addSet(new DefaultSet);
     }
 
-    /**
-     * Add messages
-     *
-     * @param array $messages
-     */
-    public function addMessages(array $messages)
-    {
-        $this->messages->addMessage($messages);
-    }
 
     /**
-     * Add a rule set
+     * Check if the data is valid
      *
-     * @param Rules\RuleSet $set
+     * @return bool
      */
-    public function addRuleSet(Rules\RuleSet $set)
+    public function isValid(): bool
     {
-        $this->sets->addRuleSet($set);
-    }
+        $success = true;
 
-    /**
-     * Get a new TestSuite to start validation
-     *
-     * @param  array $data
-     * @param  array $rules Pass this for alternative syntax
-     * @return TestSuite
-     */
-    public function make(array $data, array $rules = [])
-    {
-        if ($rules) {
-            return $this->alternativeSyntax($data, $rules);
-        }
+        foreach ($this->rules->getRules() as $field => $rules) {
+            foreach ($rules as $rule => $args) {
+                $fieldError = $this->fieldErrors[$field] ?? null;
 
-        return new TestSuite($data, $this->sets, $this->messages);
-    }
+                if (key_exists($rule, $this->sets) === false) {
+                    // Rule doesn't exist, throw an exception
+                    throw new InvalidArgumentException("Unknown rule '$rule'");
+                }
 
-    /**
-     * Test a value against a rule straight away
-     *
-     * @param  mixed  $value
-     * @param  string $ruleInfo
-     * @return boolean
-     */
-    public function test($value)
-    {
-        return new Test($this->sets, $value);
+                if ($this->params->has($field) === false) {
+                    // The field doesn't exist.
+                    if ($this->rules->isRequired($field)) {
+                        // The rule is required but doesn't exist. Set error and
+                        // continue to the next field
+                        $this->errors->add($field, $fieldError ?? "$field is required");
+                        $success = false;
+                        break;
+                    }
 
-        /**
-        $suite = $this->make(['test' => $value]);
-        $param = $suite->param('test');
+                    // The rule doesn't exist but isn't required, so let's just
+                    // continue to the next field
+                    continue;
+                }
 
-        call_user_func_array([$param, $rule], $args);
+                // Add the field value as the first argument
+                array_unshift($args, $this->params->get($field));
 
-        return $suite->passes();
-        */
-    }
+                $callback = call_user_func_array($this->sets[$rule], $args);
 
-    /**
-     * Use array syntax for the rules
-     *
-     * @param  array $data
-     * @param  array $rules
-     * @return TestSuite
-     */
-    protected function alternativeSyntax($data, $rules)
-    {
-        $suite = $this->make($data);
+                if ($callback === true) {
+                    // The validation rule passed, continue to next
+                    continue;
+                }
 
-        foreach ($rules as $field => $item) {
-            $param = $suite->param($field);
+                // Set success to false since the validation failed
+                $success = false;
 
-            foreach ($item as $itemRule) {
-                $parts = explode(':', $itemRule);
-                $rule  = $parts[0];
-                $args  = explode(',', $parts[1] ?? '');
+                if ($fieldError || is_string($callback)) {
+                    // We found a custom field error, let's use that
+                    $this->errors->add($field, $fieldError ?? $callback);
+                    break;
+                }
 
-                call_user_func_array([$param, $rule], $args);
+                // No other error messages was found or returned, create a generic one
+                $this->errors->add($field, "Validation for $rule failed");
+                break;
             }
         }
 
-        return $suite;
+        return $success;
+    }
+
+
+    /**
+     * Get all errors
+     *
+     * @return array
+     */
+    public function getErrors(): array
+    {
+        return $this->errors->all();
+    }
+
+
+    /**
+     * Add one or multiple rule sets
+     *
+     * @param AbstractSet $set
+     *
+     * @return Validator|array One set or array of sets
+     */
+    public function addSet(AbstractSet|array $set): Validator
+    {
+        if (is_array($set)) {
+            foreach ($set as $single) {
+                $this->addSet($single);
+            }
+
+            return $this;
+        }
+
+        $set->setParams($this->params);
+        $this->sets = array_replace_recursive($this->sets, $set->rules());
+
+        return $this;
     }
 }
