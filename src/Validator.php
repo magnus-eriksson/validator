@@ -1,11 +1,13 @@
 <?php
 namespace Maer\Validator;
 
+use Closure;
 use InvalidArgumentException;
 use Maer\Validator\Errors\ValidationErrors;
 use Maer\Validator\Params\Params;
 use Maer\Validator\Rules\ValidationRules;
 use Maer\Validator\Sets\AbstractSet;
+use Maer\Validator\Sets\ClosureSet;
 use Maer\Validator\Sets\DefaultSet;
 
 class Validator
@@ -31,6 +33,11 @@ class Validator
     protected ValidationRules $rules;
 
     /**
+     * @var ClosureSet
+     */
+    protected ClosureSet $closures;
+
+    /**
      * @var array
      */
     protected array $sets = [];
@@ -47,7 +54,7 @@ class Validator
         $this->rules  = new ValidationRules($rules);
         $this->errors = new ValidationErrors;
         $this->fieldErrors = $fieldErrors;
-
+        $this->closures = new ClosureSet;
         $this->addSet(new DefaultSet);
     }
 
@@ -146,5 +153,20 @@ class Validator
         $this->sets = array_replace_recursive($this->sets, $set->rules());
 
         return $this;
+    }
+
+
+    /**
+     * Add a closure rule
+     *
+     * @param string $name
+     * @param Closure $closure
+     *
+     * @return void
+     */
+    public function addClosure(string $name, Closure $closure): void
+    {
+        $this->closures->addClosure($name, $closure);
+        $this->addSet($this->closures);
     }
 }

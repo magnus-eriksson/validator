@@ -1,7 +1,9 @@
 <?php
 namespace Maer\Validator;
 
+use Closure;
 use Maer\Validator\Sets\AbstractSet;
+use Maer\Validator\Sets\ClosureSet;
 
 class Factory
 {
@@ -9,6 +11,18 @@ class Factory
      * @var array
      */
     protected array $sets = [];
+
+    /**
+     * @var ClosureSet
+     */
+    protected ClosureSet $closures;
+
+
+    public function __construct()
+    {
+        $this->closures = new ClosureSet;
+        $this->sets[] =& $this->closures;
+    }
 
 
     /**
@@ -41,6 +55,22 @@ class Factory
         } else {
             $this->sets[] = $set;
         }
+
+        return $this;
+    }
+
+
+    /**
+     * Add a global closure rule
+     *
+     * @param string $name
+     * @param Closure $closure
+     *
+     * @return Factory
+     */
+    public function registerClosure(string $name, Closure $closure): Factory
+    {
+        $this->closures->addClosure($name, $closure);
 
         return $this;
     }
